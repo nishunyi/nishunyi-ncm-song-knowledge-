@@ -1,0 +1,13 @@
+{
+  "name": "ncm-song-knowledge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "网易云音乐歌曲知识：DeepSeek 搜索与背景解读",
+  "scripts": {
+    "start": "node src/bridge.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node src/bridge.mjs --check"
+  },
+  "engines": { "node": ">=24" }
+}

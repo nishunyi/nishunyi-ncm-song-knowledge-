@@ -1,0 +1,11 @@
+node_modules/
+research-local/
+test-output/
+*.log
+*.dpapi
+config.json
+cache.json
+.env
+.env.*
+!.env.example
+*.zip
