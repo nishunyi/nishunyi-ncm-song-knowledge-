@@ -20,6 +20,7 @@
 | [Windows ActivateApplication](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-iapplicationactivationmanager-activateapplication) 与 [接口生命周期](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iapplicationactivationmanager) | 商店应用按 AUMID 激活并传递启动参数；短生命周期启动器用 CLSCTX_LOCAL_SERVER。使用 AO_NONE，无需设置包调试模式。 |
 | [MicrosoftEdge 启动器示例](https://github.com/MicrosoftEdge/edge-launcher/blob/master/MIcrosoftEdgeLauncherCsharp/Program.cs) | 官方 C# COM 接口调用示例。仓库已于 2021 年归档，只参考接口声明，行为以现行 Windows 文档为准。 |
 | [PowerShell 引号规则](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules?view=powershell-5.1) | 弯引号也被视为字符串界定符，需要转义。提示文字改用角括号，并用桌面快捷方式实际调用的 Windows PowerShell 检查全部脚本。 |
+| [XmlDocument.Load](https://learn.microsoft.com/en-us/dotnet/api/system.xml.xmldocument.load?view=netframework-4.8.1) 与 [PowerShell 编码规则](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_character_encoding?view=powershell-5.1) | Windows PowerShell 对无 BOM 文本的默认编码不适合直接读取 UTF-8 中文清单。XML 解析器直接加载原始文件，按 XML 声明识别编码，并关闭外部实体解析。 |
 
 ## 为什么这样接入
 
@@ -46,9 +47,11 @@ Store 安装目录由系统管理，直接往里面放 BetterNCM DLL 不适合�
 
 ## 验证到哪了
 
-已检查安装版本、资源包结构、状态字段和页面容器。26 项测试通过，包括服务请求、CDP 桥、DPAPI 持久化、商店应用入口解析和 COM 接口编译、全部 PowerShell 脚本的语法检查、实际启动脚本的预检查，以及独立浏览器里的首次设置、结果展示和设置入口。
+已检查安装版本、资源包结构、状态字段和页面容器。27 项测试通过，包括服务请求、CDP 桥、DPAPI 持久化、商店应用入口解析和 COM 接口编译、全部 PowerShell 脚本的语法检查、实际启动脚本的预检查，以及独立浏览器里的首次设置、结果展示和设置入口。中文 UTF-8 无 BOM 的清单样例和已安装客户端的真实清单，均在 Windows PowerShell 5.1 下验证。
 
 修复过一处启动前解析失败：错误提示中未转义的弯引号让脚本在执行前退出，隐藏窗口没有留下提示。当前提示文字已修正；启动器增加阶段日志和不激活客户端的 `-CheckOnly` 检查，相关回归检查使用 Windows PowerShell 5.1。
+
+商店清单原先使用 `Get-Content` 的默认编码读取，中文内容可能破坏标签解析。现改为 `XmlDocument.Load`，保留文件原始编码信息；错误提示也不再倾倒整份清单。
 
 还没有验证真实客户端是否接受调试启动参数、按钮在 CEF 里的挂载和布局，也没有发出真实 DeepSeek 请求。浏览器里的离线测试不能代替这几项，因此目前按实验版本处理。
 

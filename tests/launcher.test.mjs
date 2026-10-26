@@ -32,10 +32,10 @@ test('the actual shortcut script reaches preflight successfully without activati
   }
 });
 
-test('Store launch resolves the installed manifest identity and compiles the official activation interface without starting an app', { skip: process.platform !== 'win32' }, async () => {
+test('Store launch reads a Chinese UTF-8 manifest without a BOM and compiles the official activation interface without starting an app', { skip: process.platform !== 'win32' }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'ncm-launch-test-'));
   try {
-    await writeFile(join(directory, 'AppxManifest.xml'), '<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"><Applications><Application Id="CLOUDMUSIC" Executable="VFS\\ProgramFilesX86\\Netease\\CloudMusic\\cloudmusic.exe" EntryPoint="Windows.FullTrustApplication"/></Applications></Package>');
+    await writeFile(join(directory, 'AppxManifest.xml'), '<?xml version="1.0" encoding="utf-8"?><Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"><Properties><DisplayName>网易云音乐</DisplayName><Description>聆听音乐与故事</Description></Properties><Applications><Application Id="CLOUDMUSIC" Executable="VFS\\ProgramFilesX86\\Netease\\CloudMusic\\cloudmusic.exe" EntryPoint="Windows.FullTrustApplication"/></Applications></Package>');
     const testScript = join(directory, 'test.ps1');
     await writeFile(testScript, '\ufeff' + [
       "$ErrorActionPreference = 'Stop'",
@@ -53,4 +53,13 @@ test('Store launch resolves the installed manifest identity and compiles the off
     if (!absolute.startsWith(resolve(tmpdir()) + sep) || !basename(absolute).startsWith('ncm-launch-test-')) throw Error('Unexpected test cleanup path');
     await rm(absolute, { recursive: true, force: true });
   }
+});
+
+test('installed Store manifest can be read in Windows PowerShell without activating NetEase', { skip: process.platform !== 'win32' }, async t => {
+  const script = "$ErrorActionPreference='Stop'; . $env:NCM_TEST_HELPER; $package=Get-AppxPackage -Name '1F8B0F94.122165AE053F'; if (-not $package) { Write-Output '{\"installed\":false}'; exit 0 }; $target=Get-NcmStoreLaunchTarget -Package $package; [pscustomobject]@{installed=$true;kind=$target.Kind;appId=$target.AppUserModelId} | ConvertTo-Json -Compress";
+  const { stdout } = await run(shell, ['-NoProfile', '-NonInteractive', '-Command', script], { windowsHide: true, env: { ...process.env, NCM_TEST_HELPER: helper } });
+  const result = JSON.parse(stdout.trim());
+  if (!result.installed) { t.skip('No installed Store client'); return; }
+  assert.equal(result.kind, 'Store');
+  assert.match(result.appId, /^1F8B0F94\.122165AE053F_[^!]+!CLOUDMUSIC$/);
 });

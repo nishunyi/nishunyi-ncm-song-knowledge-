@@ -4,7 +4,7 @@
 
 点一下「歌曲知识」，用 DeepSeek 搜索这首歌的创作背景、歌词里的典故，以及相关的音乐和文化知识。整理后的内容会带上来源，方便接着读原文。
 
-目前是实验版本。已针对 Windows 商店版网易云 **3.1.23.204814** 做过静态适配，26 项测试通过；**客户端内挂载和真实 DeepSeek 请求还没有验证**，暂时不能保证装上就能用。
+目前是实验版本。已针对 Windows 商店版网易云 **3.1.23.204814** 做过静态适配，27 项测试通过；**客户端内挂载和真实 DeepSeek 请求还没有验证**，暂时不能保证装上就能用。
 
 ## 怎么用
 
@@ -64,7 +64,7 @@ powershell.exe -NoProfile -File .\scripts\install-shortcut.ps1
 node --test tests/*.test.mjs
 ```
 
-测试覆盖 API 请求、缓存、密钥保护、本机连接、启动脚本和界面交互。界面测试另外需要 Playwright 与 Chrome/Edge，缺少时会跳过；DPAPI 和启动入口测试仅在 Windows 运行。26 项全通过的结果来自已具备这些依赖的 Windows 环境。
+测试覆盖 API 请求、缓存、密钥保护、本机连接、启动脚本和界面交互。界面测试另外需要 Playwright 与 Chrome/Edge，缺少时会跳过；DPAPI 和启动入口测试仅在 Windows 运行，已安装客户端的清单检查在未安装时会跳过。27 项全通过的结果来自已具备这些条件的 Windows 环境。
 
 排查启动失败时，可以先运行 `powershell.exe -NoProfile -File .\scripts\launch.ps1 -CheckOnly`。这一步只检查环境和脚本依赖，不会启动网易云。
 

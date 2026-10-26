@@ -1,7 +1,10 @@
 ﻿function Get-NcmStoreLaunchTarget {
     param([Parameter(Mandatory = $true)]$Package)
     $manifestPath = Join-Path $Package.InstallLocation 'AppxManifest.xml'
-    [xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw
+    $manifest = New-Object System.Xml.XmlDocument
+    $manifest.XmlResolver = $null
+    try { $manifest.Load($manifestPath) }
+    catch { throw '无法读取商店应用清单，请检查网易云安装是否完整。' }
     $applications = @($manifest.Package.Applications.Application | Where-Object {
         [string]$_.Executable -match '(?i)(^|[\\/])cloudmusic\.exe$'
     })
